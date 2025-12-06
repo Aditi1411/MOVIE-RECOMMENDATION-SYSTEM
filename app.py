@@ -1,66 +1,4 @@
-# import streamlit as st
-# import pickle
-# import pandas as pd
-#
-# # -----------------------------
-# # Load movies and similarity
-# # -----------------------------
-# movies_dict = pickle.load(open("movies.pkl", "rb"))
-# movies = pd.DataFrame(movies_dict)
-# similarity = pickle.load(open("similarity.pkl", "rb"))
-#
-#
-# # -----------------------------
-# # Recommendation Function
-# # -----------------------------
-# def recommend(movie, top_n=5):
-#     """Recommend top N movies similar to the selected movie."""
-#     try:
-#         movie_index = movies[movies["title"] == movie].index[0]
-#     except IndexError:
-#         return []  # Movie not found
-#
-#     distances = similarity[movie_index]
-#     movie_scores = list(enumerate(distances))
-#
-#     # Sort by similarity
-#     movie_scores = sorted(movie_scores, key=lambda x: x[1], reverse=True)
-#
-#     # Take top N
-#     recommended_movies = [movies.iloc[i[0]].title for i in movie_scores[1:top_n + 1]]
-#     return recommended_movies
-#
-#
-# # -----------------------------
-# # Streamlit Frontend
-# # -----------------------------
-# st.title("🎬 Movie Recommender System")
-#
-# search_text = st.text_input("Enter the movie name:")
-#
-# if search_text:
-#     # Find all movies that contain the text (case-insensitive)
-#     filtered_movies = [
-#         str(title) for title in movies["title"].values
-#         if search_text.lower() in str(title).lower()
-#     ]
-#
-#     # If there's an exact match, put it at the top
-#     exact_match = [title for title in filtered_movies if title.lower() == search_text.lower()]
-#     others = [title for title in filtered_movies if title.lower() != search_text.lower()]
-#     filtered_movies = exact_match + sorted(others)
-#
-#     if filtered_movies:
-#         selected_movie_name = st.selectbox("Select a movie:", filtered_movies)
-#
-#         recommended = recommend(selected_movie_name)
-#         st.subheader(f"Recommended Movies for '{selected_movie_name}':")
-#         for i, movie in enumerate(recommended, start=1):
-#             st.write(f"{i}. {movie}")
-#     else:
-#         st.write(f"No movies found containing '{search_text}'.")
-# else:
-#     st.write("Start typing to search for movies...")
+
 
 
 
@@ -144,3 +82,4 @@ if st.button("Recommend"):
             if details.get("Poster") != "N/A":
                 st.image(details["Poster"], width=150)
             st.caption(movie)
+
