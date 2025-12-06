@@ -4,7 +4,7 @@ A **content-based movie recommendation web application** built using **Python an
 The system recommends movies similar to a selected title based on content similarity and also fetches real-time IMDb details using the **OMDb API**.
 
 🔗 **Live Demo (Streamlit App):**  
-https://<your-streamlit-app-link>.streamlit.app  
+https://movie-recommendation-system-jeutphzywpxrqtkgph8hzb.streamlit.app/  
 
 ---
 
@@ -13,7 +13,7 @@ https://<your-streamlit-app-link>.streamlit.app
 This project suggests movies by analyzing similarity between movies based on their metadata.  
 Instead of recommending based on user behavior, it focuses on **content similarity**, making it fast, simple, and effective.
 
-It is designed as an **academic / Final Year Project** and is easy to explain during viva.
+
 
 ---
 
@@ -49,7 +49,7 @@ Large model files are stored externally using **Hugging Face Hub**.
 
 ---
 
-## 📂 Project Structure
+
 
 
 
