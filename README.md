@@ -1,5 +1,56 @@
-# MOVIE RECOMMENDATION SYSTEM
-A movie recommendation website that suggests similar films based on your chosen title. It helps users discover new movies they might enjoy using precomputed data and an easy-to-use interface for quick, personalized recommendations.
+# 🎬 Movie Recommendation System
+
+A **content-based movie recommendation web application** built using **Python and Streamlit**.  
+The system recommends movies similar to a selected title based on content similarity and also fetches real-time IMDb details using the **OMDb API**.
+
+🔗 **Live Demo (Streamlit App):**  
+https://<your-streamlit-app-link>.streamlit.app  
+
+---
+
+## 📌 Project Overview
+
+This project suggests movies by analyzing similarity between movies based on their metadata.  
+Instead of recommending based on user behavior, it focuses on **content similarity**, making it fast, simple, and effective.
+
+It is designed as an **academic / Final Year Project** and is easy to explain during viva.
+
+---
+
+## 🧠 How It Works
+
+1. Movie metadata is loaded from a CSV file
+2. A precomputed similarity matrix is used to find similar movies
+3. On selecting a movie:
+   - Top 5 similar movies are recommended
+   - IMDb details of the selected movie are fetched using the OMDb API
+
+Large model files are stored externally using **Hugging Face Hub**.
+
+---
+
+## 🚀 Features
+
+- ✅ Content-based movie recommendations  
+- ✅ Real-time IMDb rating, year, genre, and plot  
+- ✅ Clean and interactive Streamlit UI  
+- ✅ Fast performance using caching  
+- ✅ Cloud-deployable (Streamlit Cloud)  
+
+---
+
+## 🛠️ Tech Stack
+
+- **Python**
+- **Streamlit** – Web framework  
+- **Pandas & NumPy** – Data processing  
+- **OMDb API** – Movie details  
+- **Hugging Face Hub** – Model storage  
+
+---
+
+## 📂 Project Structure
+
 
 
 
