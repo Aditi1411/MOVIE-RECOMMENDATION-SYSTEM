@@ -60,5 +60,5 @@ Large model files are stored externally using **Hugging Face Hub**.
 - **tmdb_5000_credits.csv:** [Download here](https://drive.google.com/file/d/1bpvEM9Rfq2nGtBK0diy0q1syf9nkDTKU/view?usp=sharing)
 - **.ipynb_checkpoints:** [View folder](https://drive.google.com/drive/folders/1u46zPIdt4oI2ojBVfDzoT8OklfTJv2LU?usp=drive_link)
 - **similarity.pkl:** [Download here](https://drive.google.com/file/d/1lqDXaAaiCNgiSwfTRm_WzRINxPeFmK4j/view?usp=drive_link)
-   - **tmdb_5000_movies.csv:** [Download here](https://drive.google.com/file/d/1Z84rt7ud6STxppYz_fNo-ZtSMjArg501/view?usp=sharing)
+ - **tmdb_5000_movies.csv:** [Download here](https://drive.google.com/file/d/1Z84rt7ud6STxppYz_fNo-ZtSMjArg501/view?usp=sharing)
 
