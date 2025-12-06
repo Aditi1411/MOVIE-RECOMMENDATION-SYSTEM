@@ -1,146 +1,152 @@
-# import streamlit as st
-# import pickle
-# import pandas as pd
-#
-# # -----------------------------
-# # Load movies and similarity
-# # -----------------------------
-# movies_dict = pickle.load(open("movies.pkl", "rb"))
-# movies = pd.DataFrame(movies_dict)
-# similarity = pickle.load(open("similarity.pkl", "rb"))
-#
-#
-# # -----------------------------
-# # Recommendation Function
-# # -----------------------------
-# def recommend(movie, top_n=5):
-#     """Recommend top N movies similar to the selected movie."""
-#     try:
-#         movie_index = movies[movies["title"] == movie].index[0]
-#     except IndexError:
-#         return []  # Movie not found
-#
-#     distances = similarity[movie_index]
-#     movie_scores = list(enumerate(distances))
-#
-#     # Sort by similarity
-#     movie_scores = sorted(movie_scores, key=lambda x: x[1], reverse=True)
-#
-#     # Take top N
-#     recommended_movies = [movies.iloc[i[0]].title for i in movie_scores[1:top_n + 1]]
-#     return recommended_movies
-#
-#
-# # -----------------------------
-# # Streamlit Frontend
-# # -----------------------------
-# st.title("🎬 Movie Recommender System")
-#
-# search_text = st.text_input("Enter the movie name:")
-#
-# if search_text:
-#     # Find all movies that contain the text (case-insensitive)
-#     filtered_movies = [
-#         str(title) for title in movies["title"].values
-#         if search_text.lower() in str(title).lower()
-#     ]
-#
-#     # If there's an exact match, put it at the top
-#     exact_match = [title for title in filtered_movies if title.lower() == search_text.lower()]
-#     others = [title for title in filtered_movies if title.lower() != search_text.lower()]
-#     filtered_movies = exact_match + sorted(others)
-#
-#     if filtered_movies:
-#         selected_movie_name = st.selectbox("Select a movie:", filtered_movies)
-#
-#         recommended = recommend(selected_movie_name)
-#         st.subheader(f"Recommended Movies for '{selected_movie_name}':")
-#         for i, movie in enumerate(recommended, start=1):
-#             st.write(f"{i}. {movie}")
-#     else:
-#         st.write(f"No movies found containing '{search_text}'.")
-# else:
-#     st.write("Start typing to search for movies...")
-
-
-
 import streamlit as st
 import pickle
 import pandas as pd
 import requests
+from huggingface_hub import hf_hub_download
 
-# ---------------- PAGE CONFIG ---------------- #
-st.set_page_config(
-    page_title="Movie Recommendation System",
-    layout="wide"
-)
+# ==========================
+# OMDb API KEY
+# ==========================
+OMDB_API_KEY = "eb6579ab"
 
-# ---------------- OMDb API KEY ---------------- #
-API_KEY = "eb6579ab"
+# ==========================
+# HUGGING FACE CONFIG
+# ==========================
+REPO_ID = "aditi1411963/movie-recommendation"
+FILENAME = "similarity.pkl"
+REPO_TYPE = "model"
 
-# ---------------- LOAD FILES ---------------- #
-movies = pickle.load(open("movies.pkl", "rb"))
-movie_dict = pickle.load(open("movie_dict.pkl", "rb"))
+# ==========================
+# LOAD DATA
+# ==========================
+@st.cache_data
+def load_movies():
+    with open("movies_dict.pkl", "rb") as f:
+        movies_dict = pickle.load(f)
+    return pd.DataFrame(movies_dict)
 
-movies_df = pd.DataFrame(movie_dict)
-
-# ---------------- FUNCTIONS ---------------- #
-def fetch_movie_details(title):
-    url = f"http://www.omdbapi.com/?apikey={API_KEY}&t={title}"
-    response = requests.get(url).json()
-    return response
-
-def recommend(movie):
-    movie_index = movies_df[movies_df['title'] == movie].index[0]
-    distances = sorted(
-        list(enumerate(movies[movie_index])),
-        reverse=True,
-        key=lambda x: x[1]
+@st.cache_resource
+def load_similarity():
+    path = hf_hub_download(
+        repo_id=REPO_ID,
+        repo_type=REPO_TYPE,
+        filename=FILENAME
     )
+    with open(path, "rb") as f:
+        similarity = pickle.load(f)
+    return similarity
 
-    recommended_movies = []
-    for i in distances[1:6]:
-        recommended_movies.append(movies_df.iloc[i[0]].title)
+# ==========================
+# OMDb DETAILS (SEARCHED MOVIE ONLY)
+# ==========================
+@st.cache_data(show_spinner=False)
+def fetch_movie_details(title):
+    url = "http://www.omdbapi.com/"
+    params = {"apikey": OMDB_API_KEY, "t": title}
+    data = requests.get(url, params=params).json()
 
-    return recommended_movies
+    if data.get("Response") == "True":
+        return {
+            "rating": data.get("imdbRating", "N/A"),
+            "votes": data.get("imdbVotes", "N/A"),
+            "year": data.get("Year", "N/A"),
+            "runtime": data.get("Runtime", "N/A"),
+            "genre": data.get("Genre", "N/A"),
+            "director": data.get("Director", "N/A"),
+            "actors": data.get("Actors", "N/A"),
+            "language": data.get("Language", "N/A"),
+            "awards": data.get("Awards", "N/A"),
+            "plot": data.get("Plot", "N/A")
+        }
+    return None
 
-# ---------------- UI ---------------- #
-st.title("🎬 Movie Recommendation System")
-st.caption("Search movies and get ML-based recommendations")
+# ==========================
+# RECOMMEND FUNCTION
+# ==========================
+def recommend(movie, movies, similarity):
+    index = movies[movies["title"] == movie].index[0]
+    distances = sorted(
+        list(enumerate(similarity[index])),
+        key=lambda x: x[1],
+        reverse=True
+    )[1:6]
+    return movies.iloc[[i[0] for i in distances]]
 
-selected_movie = st.selectbox(
-    "🔍 Select a movie",
-    movies_df['title'].values
+# ==========================
+# STREAMLIT UI
+# ==========================
+st.set_page_config(page_title="Movie Recommender", layout="wide")
+
+# ---------- SIDEBAR (IMPROVED ABOUT PROJECT) ----------
+st.sidebar.title("🎬 Movie Recommender")
+
+st.sidebar.markdown(
+    """
+    ### 📌 About Project
+    This project is a **content-based movie recommendation system** that suggests
+    movies based on similarity in content rather than user behavior.
+
+    ### 🧠 Recommendation Logic
+    - Works on movie metadata & features
+    - Recommends movies similar to the selected title
+
+    ### 🛠️ Technologies Used
+    - **Python**
+    - **Streamlit** (UI & deployment)
+    - **Pandas & Pickle**
+    - **Hugging Face Hub** (model storage)
+    - **OMDb API** (IMDb data)
+
+    ### ✅ Key Features
+    - Real-time IMDb rating & details
+    - Fast similarity matching
+    - Simple & user-friendly interface
+    - No user login required
+
+    ### 🎓 Academic Use
+    - Suitable for **Final Year Project**
+    - Easy to explain in **viva**
+    - Demonstrates ML & API integration
+    """
 )
 
-if st.button("Recommend"):
-    movie_data = fetch_movie_details(selected_movie)
+# ---------- LOAD ----------
+movies = load_movies()
+similarity = load_similarity()
 
-    col1, col2 = st.columns([1, 2])
+# ---------- SEARCH ----------
+st.markdown("<h1 style='text-align:center;'>🎥 Movie Recommendation System</h1>", unsafe_allow_html=True)
 
-    with col1:
-        if movie_data.get("Poster") != "N/A":
-            st.image(movie_data["Poster"], width=300)
+c1, c2, c3 = st.columns([1, 2, 1])
+with c2:
+    selected_movie = st.selectbox("Search Movie", movies["title"].values)
+    recommend_btn = st.button("Recommend")
+
+# ---------- OUTPUT ----------
+if recommend_btn:
+    left, right = st.columns([2, 1])
+
+    with left:
+        st.subheader("🎬 Selected Movie Details")
+        st.markdown(f"### {selected_movie}")
+
+        details = fetch_movie_details(selected_movie)
+
+        if details:
+            st.write(f"⭐ **IMDb Rating:** {details['rating']} ({details['votes']} votes)")
+            st.write(f"📅 **Year:** {details['year']}")
+            st.write(f"⏱️ **Runtime:** {details['runtime']}")
+            st.write(f"🎭 **Genre:** {details['genre']}")
+            st.write(f"🎬 **Director:** {details['director']}")
+            st.write(f"👥 **Actors:** {details['actors']}")
+            st.write(f"🗣️ **Language:** {details['language']}")
+            st.write(f"🏆 **Awards:** {details['awards']}")
+            st.write(f"📝 **Plot:** {details['plot']}")
         else:
-            st.image("https://via.placeholder.com/300x450")
+            st.write("Movie details not available.")
 
-    with col2:
-        st.subheader(movie_data.get("Title", selected_movie))
-        st.write("⭐ IMDb Rating:", movie_data.get("imdbRating", "N/A"))
-        st.write("🎭 Genre:", movie_data.get("Genre", "N/A"))
-        st.write("📅 Year:", movie_data.get("Year", "N/A"))
-        st.write("🕒 Runtime:", movie_data.get("Runtime", "N/A"))
-        st.write("📖 Plot:", movie_data.get("Plot", "N/A"))
-
-    st.markdown("---")
-    st.subheader("✅ Recommended Movies")
-
-    recommendations = recommend(selected_movie)
-    cols = st.columns(5)
-
-    for i, movie in enumerate(recommendations):
-        with cols[i]:
-            details = fetch_movie_details(movie)
-            if details.get("Poster") != "N/A":
-                st.image(details["Poster"], width=150)
-            st.caption(movie)
+    with right:
+        st.subheader("✅ Recommended Movies")
+        recommendations = recommend(selected_movie, movies, similarity)
+        for i, row in enumerate(recommendations.itertuples(), start=1):
+            st.write(f"{i}. {row.title}")
