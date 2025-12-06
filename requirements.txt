@@ -1,5 +1,7 @@
 streamlit
 pandas
 numpy
-scikit-learn
+requests
 huggingface_hub
+pickle5
+
